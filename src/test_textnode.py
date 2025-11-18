@@ -23,6 +23,7 @@ class TestTextNode(unittest.TestCase):
 
     def test_not_repr(self):
         node = TextNode("This is a text node", TextType.BOLD)
+        # None != none
         expected = "TextNode(This is a text node, bold, none)"
         self.assertNotEqual(str(node), expected)
 
