@@ -1,6 +1,6 @@
 import unittest
 
-from block_parser import BlockType, markdown_to_blocks, block_to_block_type
+from block_parser import BlockType, markdown_to_blocks, block_to_block_type, markdown_to_html_node
 
 class TestBlockParser(unittest.TestCase):
     def test_markdown_to_blocks(self):
@@ -147,6 +147,85 @@ With not a list item here"""
         md = """1.This looks like an ordered list with only one item but nah"""
         self.assertEqual(block_to_block_type(md),BlockType.PARAGRAPH)
 
+    def test_paragraphs(self):
+        md = """
+This is **bolded** paragraph 
+text in a p 
+tag here
 
+This is another paragraph with _italic_ text and `code` here
+
+    """
+
+        node = markdown_to_html_node(md)
+        html = node.to_html()
+        self.assertEqual(
+            html,
+            "<div><p>This is <b>bolded</b> paragraph text in a p tag here</p><p>This is another paragraph with <i>italic</i> text and <code>code</code> here</p></div>",
+        )
+
+    def test_codeblock(self):
+        md = """
+```
+This is text that _should_ remain
+the **same** even with inline stuff
+```
+"""
+        node = markdown_to_html_node(md)
+        html = node.to_html()
+        self.assertEqual(
+            html,
+            "<div><pre><code>This is text that _should_ remain\nthe **same** even with inline stuff\n</code></pre></div>",
+        )
+
+    def test_multi_headers(self):
+        md = """
+# H1 Here
+
+## H2 Here
+
+### H3 Here
+
+#### H4 Here
+
+##### H5 Here
+
+###### H6 Here
+
+####### This is a paragraph lol
+"""
+        node = markdown_to_html_node(md)
+        html = node.to_html()
+        self.assertEqual(
+            html,
+            "<div><h1>H1 Here</h1><h2>H2 Here</h2><h3>H3 Here</h3><h4>H4 Here</h4><h5>H5 Here</h5><h6>H6 Here</h6><p>####### This is a paragraph lol</p></div>",
+        )
+
+    def test_markdown_mix(self):
+        md = """
+# This is a header
+
+
+This is a paragraph with an extra new line above this 
+This is the same paragraph on a new line
+
+
+
+
+
+
+- This is a list with EXCESSIVE newlines above this
+- and an item here
+- and another one here with a few extra newlines below this
+
+
+
+"""
+        node = markdown_to_html_node(md)
+        html = node.to_html()
+        self.assertEqual(
+            html,
+            "<div><h1>This is a header</h1><p>This is a paragraph with an extra new line above this This is the same paragraph on a new line</p><ul><li>This is a list with EXCESSIVE newlines above this</li><li>and an item here</li><li>and another one here with a few extra newlines below this</li></ul></div>",
+        )
 if __name__ == "__main__":
     unittest.main()

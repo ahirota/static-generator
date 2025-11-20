@@ -12,6 +12,8 @@ def split_nodes_delimiter(old_nodes, delimiter, text_type):
             if len(split) % 2 == 0:
                 raise Exception("Text Node contains uneven number of delimiters, unable to split properly")
             for i in range(len(split)):
+                if split[i] == "":
+                    continue
                 if i % 2 == 0:
                     split_nodes.append(TextNode(split[i], TextType.TEXT))
                 else:
