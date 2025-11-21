@@ -35,7 +35,7 @@ def extract_title(markdown):
         raise Exception("No H1 Title Found in Markdown")
     return title
 
-def generate_page(from_path, template_path, dest_path):
+def generate_page(from_path, template_path, dest_path, basepath):
     if not os.path.isfile(from_path):
         raise Exception(f"{from_path} is not a valid markdown file.")
     
@@ -53,7 +53,7 @@ def generate_page(from_path, template_path, dest_path):
     title = extract_title(raw_md)
     node = markdown_to_html_node(raw_md)
     html = node.to_html()
-    generated = template.replace("{{ Title }}", title, 1).replace("{{ Content }}", html)
+    generated = template.replace("{{ Title }}", title, 1).replace("{{ Content }}", html).replace("href=\"/", f"href=\"{basepath}").replace("src=\"/", f"src=\"{basepath}")
 
     # Check and Create Sub Folders if they exist
     dir = os.path.dirname(dest_path)
@@ -64,7 +64,7 @@ def generate_page(from_path, template_path, dest_path):
     html_file.write(generated)
     html_file.close()
 
-def generate_pages_recursive(dir_path_content, template_path, dest_dir_path):
+def generate_pages_recursive(dir_path_content, template_path, dest_dir_path, basepath):
     # Check and Make Public Directory Subfolders
     if not os.path.exists(dest_dir_path):
         os.mkdir(dest_dir_path)
@@ -80,9 +80,8 @@ def generate_pages_recursive(dir_path_content, template_path, dest_dir_path):
             htmlified_name = filename.replace(".md",".html")
             dest_path = os.path.join(dest_dir_path, htmlified_name)
 
-            generate_page(content_path,template_path,dest_path)
-            
+            generate_page(content_path,template_path,dest_path, basepath)
         # Else Folder, Recursively Call Generate Page
         else:
             dest_path = os.path.join(dest_dir_path, filename)
-            generate_pages_recursive(content_path, template_path, dest_path)
+            generate_pages_recursive(content_path, template_path, dest_path, basepath)
