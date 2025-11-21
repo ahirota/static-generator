@@ -36,25 +36,53 @@ def extract_title(markdown):
     return title
 
 def generate_page(from_path, template_path, dest_path):
-    print(f"Generating Page from {from_path} to {dest_path}, using {template_path}.")
     if not os.path.isfile(from_path):
         raise Exception(f"{from_path} is not a valid markdown file.")
+    
+    print(f"Generating Page from {from_path} to {dest_path}, using {template_path}.")
+    # Get Markdown
     raw_md = open(from_path).read()
 
+    # Get Template
     if not os.path.isfile(template_path):
         raise Exception(f"{template_path} is not a valid template file.")
     template = open(template_path).read()
 
-    title = extract_title(raw_md)
 
+    # Build HTML File
+    title = extract_title(raw_md)
     node = markdown_to_html_node(raw_md)
     html = node.to_html()
-
     generated = template.replace("{{ Title }}", title, 1).replace("{{ Content }}", html)
 
+    # Check and Create Sub Folders if they exist
     dir = os.path.dirname(dest_path)
     os.makedirs(dir, exist_ok=True)
 
-    f = open(dest_path, 'w', encoding="utf-8")
-    f.write(generated)
-    f.close()
+    # Write HTML
+    html_file = open(dest_path, 'w', encoding="utf-8")
+    html_file.write(generated)
+    html_file.close()
+
+def generate_pages_recursive(dir_path_content, template_path, dest_dir_path):
+    # Check and Make Public Directory Subfolders
+    if not os.path.exists(dest_dir_path):
+        os.mkdir(dest_dir_path)
+
+    # Loop through Content Directory
+    for filename in os.listdir(dir_path_content):
+        # Get Content Folder/Markdown File
+        content_path = os.path.join(dir_path_content, filename)
+
+        # If Markdown File Found
+        if os.path.isfile(content_path):
+            # Create New Path Name by swapping file extensions
+            htmlified_name = filename.replace(".md",".html")
+            dest_path = os.path.join(dest_dir_path, htmlified_name)
+
+            generate_page(content_path,template_path,dest_path)
+            
+        # Else Folder, Recursively Call Generate Page
+        else:
+            dest_path = os.path.join(dest_dir_path, filename)
+            generate_pages_recursive(content_path, template_path, dest_path)

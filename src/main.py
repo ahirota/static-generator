@@ -1,5 +1,5 @@
 import os, shutil
-from site_generator import copy_to_public_recursive, copy_to_public_copytree, generate_page
+from site_generator import copy_to_public_recursive, copy_to_public_copytree, generate_pages_recursive
 
 # Executing From Root Folder (not src)
 static = "./static"
@@ -10,12 +10,12 @@ def main():
     if os.path.exists(public):
         shutil.rmtree(public)
 
+    # The commented uses copytree to avoid recursion
+    # copy_to_public_copytree(static, public)
     copy_to_public_recursive(static, public)
 
-    # The following uses copytree to avoid recursion
-    # copy_to_public_copytree(static, public)
-
-    generate_page("./content/index.md", "./template.html", "./public/index.html")
+    # Generate Pages by Recursively Crawling the Content Directory
+    generate_pages_recursive("./content", "./template.html", "./public")
 
 if __name__ == "__main__":
     main()
