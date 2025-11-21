@@ -24,9 +24,10 @@ class LeafNode(HTMLNode):
         super().__init__(tag, value, None, props)
 
     def to_html(self):
-        if not self.value:
+        # Empty String is Falsy, was getting false positive on Img Tags
+        if self.value is None:
             raise ValueError("No Value property found, invalid HTML.")
-        if not self.tag:
+        if self.tag is None:
             return self.value
         else:
             return f"<{self.tag}{self.props_to_html()}>{self.value}</{self.tag}>"

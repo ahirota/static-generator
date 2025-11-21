@@ -91,12 +91,13 @@ def block_to_html(block,block_type):
         return ParentNode("ol",children)
     
     elif block_type == BlockType.QUOTE:
-        children = []
+        lines = []
         for line in block.split("\n"):
             # Remove Quote ">" From the lines
-            block_text = line[1:]
-            # Each Line is a sibling childnode that needs to be executed on
-            children.extend(text_to_children(block_text))
+            # Need to strip from Quote and rejoin because that's the intended functionality
+            lines.append(line.lstrip(">").strip())
+        block_text = " ".join(lines)
+        children = text_to_children(block_text)
         return ParentNode("blockquote", children)
 
     else:
